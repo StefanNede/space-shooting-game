@@ -51,7 +51,8 @@ def move_player(keys_pressed, player):
         player.x -= VEL
 
 
-def move_enemy(enemy):
+def move_enemy(enemy): 
+    # need to check for collisions with the bullet, the player, and if it goes off the screen
     enemy.y += 1
 
 
