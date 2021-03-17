@@ -11,7 +11,20 @@ FPS = 60
 VEL = 3
 BULLET_VEL = 3
 MAX_BULLETS = 3
-ENEMY_VEL = 1
+MAX_ENEMY_VEL = 2
+# the user starts with 10 lives, aka they can get hit 10 times
+LIFE = 10
+# stores the current level
+LEVEL = 1
+# stores the amount of levels the game has
+AMOUNT_OF_LEVELS = 5
+# this stores the amount of enemies that will be on the screen at a time
+# at different levels
+LEVELS_TO_ENEMIES = {1: 3, 2: 5, 3: 8, 4: 10, 5: 13}
+# these are the amount of seconds to be played at different levels until
+# you either die or pass the level
+LEVELS_TO_TIME = {1: 10, 2: 11, 3: 12, 4: 13, 5: 14}
+
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -22,7 +35,7 @@ PLAYER = pygame.Rect(WIDTH//2-15, HEIGHT-50, 30, 30)
 
 
 class Enemy:
-    def __init__(self, xposition, yposition, velocity, width=10, height=10):
+    def __init__(self, xposition, yposition, velocity, width=20, height=10):
         self.width = width
         self.height = height
         self.xposition = xposition
@@ -87,7 +100,8 @@ def main():
                         PLAYER.x + PLAYER.width//2 - 2.5, PLAYER.y, 5, 10)
                     bullets.append(bullet)
         for i in range(10 - len(enemies)):
-            ENEMY_VEL = float(random.uniform(1, 2.5))
+            ENEMY_VEL = float(random.uniform(1, MAX_ENEMY_VEL))
+            print(ENEMY_VEL)
             xlocation = random.randint(0, WIDTH)
             curr_enemy = [Enemy(xlocation, 0, ENEMY_VEL), Enemy(
                 xlocation, 0, ENEMY_VEL).draw_enemy()]
