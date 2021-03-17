@@ -11,7 +11,7 @@ FPS = 60
 VEL = 3
 BULLET_VEL = 3
 MAX_BULLETS = 3
-MAX_ENEMY_VEL = 2
+ENEMY_VEL = 1
 # the user starts with 10 lives, aka they can get hit 10 times
 LIFE = 10
 # stores the current level
@@ -30,6 +30,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
+BLUE = (0, 0, 255)
 
 PLAYER = pygame.Rect(WIDTH//2-15, HEIGHT-50, 30, 30)
 
@@ -46,6 +47,34 @@ class Enemy:
         enemy = pygame.Rect(self.xposition, self.yposition,
                             self.width, self.height)
         return enemy
+
+
+def makeParticles(xlocation, ylocation):
+    """ makes particles for a collision """
+    rect1 = pygame.Rect(xlocation, ylocation, 10, 10)
+    rect2 = pygame.Rect(xlocation, ylocation, 10, 10)
+    rect3 = pygame.Rect(xlocation, ylocation, 10, 10)
+    rect4 = pygame.Rect(xlocation, ylocation, 10, 10)
+    start_time = time.time()
+    elapsed_time = 0
+    while elapsed_time < 0.1:
+        elapsed_time = time.time() - start_time
+        particles = [rect1, rect2, rect3, rect4]
+        particles[0].x += 3
+        particles[0].y -= 3
+        particles[1].x += 3
+        particles[1].y += 3
+        particles[2].x -= 3
+        particles[2].y += 3
+        particles[3].x -= 3
+        particles[3].y -= 3
+        draw_particles(particles)
+
+
+def draw_particles(particles):
+    for particle in particles:
+        pygame.draw.rect(WIN, BLUE, particle)
+        pygame.display.update()
 
 
 def draw_window(bullets, enemies):
@@ -66,13 +95,24 @@ def move_player(keys_pressed, player):
         player.x -= VEL
 
 
-def move_enemies(enemies):
+def move_enemies(enemies, bullets, player):
+    global LIFE
     # enemy[1] is pygame.Rect
     # enemy[0] is object
     for enemy in enemies:
         enemy[1].y += enemy[0].velocity
         if enemy[1].y > HEIGHT:
             enemies.remove(enemy)
+            # player loses a life if the enemy gets to the end
+            LIFE -= 1
+        if enemy[1].colliderect(player):
+            LIFE -= 1
+            enemies.remove(enemy)
+        for bullet in bullets:
+            if enemy[1].colliderect(bullet):
+                bullets.remove(bullet)
+                enemies.remove(enemy)
+                makeParticles(bullet.x, bullet.y)
 
 
 def generate_bullets(bullets):
@@ -90,7 +130,7 @@ def main():
     # this will be a 2d list that stores the enemy object at the first nested list index
     # and the pygame rectangle of the enemy at the second index
     enemies = []
-    while run:
+    while run and LIFE > 0:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -99,14 +139,12 @@ def main():
                     bullet = pygame.Rect(
                         PLAYER.x + PLAYER.width//2 - 2.5, PLAYER.y, 5, 10)
                     bullets.append(bullet)
-        for i in range(10 - len(enemies)):
-            ENEMY_VEL = float(random.uniform(1, MAX_ENEMY_VEL))
-            print(ENEMY_VEL)
-            xlocation = random.randint(0, WIDTH)
+        while len(enemies) < LEVELS_TO_ENEMIES[LEVEL]:
+            xlocation = random.randint(30, WIDTH-30)
             curr_enemy = [Enemy(xlocation, 0, ENEMY_VEL), Enemy(
                 xlocation, 0, ENEMY_VEL).draw_enemy()]
             enemies.append(curr_enemy)
-        move_enemies(enemies)
+        move_enemies(enemies, bullets, PLAYER)
         keys_pressed = pygame.key.get_pressed()
         move_player(keys_pressed, PLAYER)
         generate_bullets(bullets)
