@@ -3,6 +3,8 @@ import os
 import random
 import time
 
+pygame.font.init()
+
 WIDTH, HEIGHT = 400, 500
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -15,16 +17,15 @@ ENEMY_VEL = 1
 # the user starts with 10 lives, aka they can get hit 10 times
 LIFE = 10
 # stores the current level
-LEVEL = 1
+LEVEL = 0
 # stores the amount of levels the game has
 AMOUNT_OF_LEVELS = 5
 # this stores the amount of enemies that will be on the screen at a time
 # at different levels
-LEVELS_TO_ENEMIES = {1: 3, 2: 5, 3: 8, 4: 10, 5: 13}
+LEVELS_TO_ENEMIES = [3, 5, 8, 10, 13]
 # these are the amount of seconds to be played at different levels until
 # you either die or pass the level
-LEVELS_TO_TIME = {1: 10, 2: 11, 3: 12, 4: 13, 5: 14}
-
+LEVELS_TO_TIME = [10, 11, 12, 13, 14]
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -33,6 +34,9 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 
 PLAYER = pygame.Rect(WIDTH//2-15, HEIGHT-50, 30, 30)
+
+# fonts
+MAIN_FONT = pygame.font.SysFont('comicsans', 40)
 
 
 class Enemy:
@@ -79,6 +83,12 @@ def draw_particles(particles):
 
 def draw_window(bullets, enemies):
     WIN.fill(BLACK)
+    life_text = MAIN_FONT.render(
+        "Lives: " + str(LIFE), 1, WHITE)
+    level_text = MAIN_FONT.render(
+        "Level: " + str(LEVEL + 1), 1, WHITE)
+    WIN.blit(life_text, (WIDTH - life_text.get_width()-10, 10))
+    WIN.blit(level_text, (10, 10))
     for bullet in bullets:
         pygame.draw.rect(WIN, RED, bullet)
     for enemy in enemies:
@@ -123,14 +133,21 @@ def generate_bullets(bullets):
 
 
 def main():
-    global ENEMY_VEL
+    global ENEMY_VEL, LEVEL
     clock = pygame.time.Clock()
     run = True
     bullets = []
     # this will be a 2d list that stores the enemy object at the first nested list index
     # and the pygame rectangle of the enemy at the second index
     enemies = []
+    start_time = time.time()
     while run and LIFE > 0:
+        elapsed_time = time.time() - start_time
+        # checks if the person eneters the next level
+        if elapsed_time > LEVELS_TO_TIME[LEVEL] and LEVEL <= 4:
+            LEVEL += 1
+            start_time = time.time()
+            print("next level reached:  " + str(LEVEL))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
