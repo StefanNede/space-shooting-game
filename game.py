@@ -2,6 +2,7 @@ import pygame
 import os
 import random
 import time
+import high_score
 
 pygame.init()
 

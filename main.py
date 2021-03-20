@@ -1,6 +1,7 @@
 import game
 import pygame
 import os
+import high_score
 
 pygame.init()
 
